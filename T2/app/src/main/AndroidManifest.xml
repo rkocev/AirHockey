@@ -12,7 +12,7 @@
         android:theme="@style/Theme.AR_AH"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.AirHockey.AirHockeyActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
