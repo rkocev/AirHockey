@@ -9,6 +9,7 @@ import static android.opengl.GLES10.glViewport;
 import static android.opengl.GLES20.glEnableVertexAttribArray;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
+import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glUniform4f;
 import static android.opengl.GLES20.glUseProgram;
 import static android.opengl.GLES20.glVertexAttribPointer;
@@ -40,7 +41,8 @@ public class AirHockeyRenderer implements Renderer {
     private int uColorLocation;
     private int aPositionLocation;
     private static final int POSITION_COMPONENT_COUNT = 2;
-
+    private int uPointSizeLocation;
+    private static final float PUCK_SIZE = 25.0f;
 
     public AirHockeyRenderer(Context context){
         this.context = context;
@@ -57,6 +59,21 @@ public class AirHockeyRenderer implements Renderer {
 
                 // Mallets
                 0f, -0.25f, 0f, 0.25f,
+
+                // Puck
+                0.0f, 0.0f,
+
+                // Bottom Border Line
+                -0.5f, -0.5f, 0.5f, -0.5f,
+
+                // Top Border Line
+                -0.5f, 0.5f, 0.5f, 0.5f,
+
+                // Left Border Line
+                -0.5f, 0.5f, -0.5f, -0.5f,
+
+                // Right Border Line
+                0.5f, 0.5f, 0.5f, -0.5f,
         };
 
         vertexData = ByteBuffer.allocateDirect(
@@ -69,7 +86,7 @@ public class AirHockeyRenderer implements Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
         String vertexShaderSource = TextResourceReader.readTextFileFromResource(context, R.raw.simple_vertex_shader);
         String fragmentShaderSource = TextResourceReader.readTextFileFromResource(context, R.raw.simple_fragment_shader);
 
@@ -85,6 +102,7 @@ public class AirHockeyRenderer implements Renderer {
 
         uColorLocation = glGetUniformLocation(program, "u_Color");
         aPositionLocation = glGetAttribLocation(program, "a_Position");
+        uPointSizeLocation = glGetUniformLocation(program, "u_PointSize");
 
         vertexData.position(0);
         glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT, false, 0, vertexData);
@@ -112,6 +130,10 @@ public class AirHockeyRenderer implements Renderer {
         glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         glDrawArrays(GL_LINES, 6, 2);
 
+        // Set the mullets (mallets) size to be twice as big as the puck
+        float mulletsSize = 2.0f * PUCK_SIZE;
+        // Adjust size.
+        glUniform1f(uPointSizeLocation, mulletsSize);
         // Draw the first mallet blue.
         glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
         glDrawArrays(GL_POINTS, 8, 1);
@@ -119,5 +141,27 @@ public class AirHockeyRenderer implements Renderer {
         // Draw the second mallet red.
         glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         glDrawArrays(GL_POINTS, 9, 1);
+
+        // Readjust size.
+        glUniform1f(uPointSizeLocation, PUCK_SIZE);
+        // Draw the puck red.
+        glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_POINTS, 10, 1);
+
+        // Draw the bottom border line.
+        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_LINES, 11, 2);
+
+        // Draw the top border line.
+        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_LINES, 13, 2);
+
+        // Draw the left border line.
+        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_LINES, 15, 2);
+
+        // Draw the right border line.
+        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
+        glDrawArrays(GL_LINES, 17, 2);
     }
 }
