@@ -18,6 +18,7 @@ import static javax.microedition.khronos.opengles.GL10.GL_FLOAT;
 import static javax.microedition.khronos.opengles.GL10.GL_LINES;
 import static javax.microedition.khronos.opengles.GL10.GL_POINTS;
 import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLES;
+import static javax.microedition.khronos.opengles.GL10.GL_TRIANGLE_FAN;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
@@ -41,39 +42,31 @@ public class AirHockeyRenderer implements Renderer {
     private int uColorLocation;
     private int aPositionLocation;
     private static final int POSITION_COMPONENT_COUNT = 2;
-    private int uPointSizeLocation;
-    private static final float PUCK_SIZE = 25.0f;
+    private static final int COLOR_COMPONENT_COUNT = 3;
+    private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT;
+    private int aColorLocation;
+    private int program;
 
-    public AirHockeyRenderer(Context context){
+    public AirHockeyRenderer(Context context) {
         this.context = context;
 
         float[] tableVerticesWithTriangles = {
-                // Triangle 1
-                -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
-
-                // Triangle 2
-                -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
+                // Order of coordinates: X, Y, R, G, B
+                // Triangle Fan
+                0f, 0f, 1f, 1f, 1f,
+                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
+                0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
+                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
 
                 // Line 1
-                -0.5f, 0f, 0.5f, 0f,
+                -0.5f, 0f, 1f, 0f, 0f,
+                0.5f, 0f, 1f, 0f, 0f,
 
                 // Mallets
-                0f, -0.25f, 0f, 0.25f,
-
-                // Puck
-                0.0f, 0.0f,
-
-                // Bottom Border Line
-                -0.5f, -0.5f, 0.5f, -0.5f,
-
-                // Top Border Line
-                -0.5f, 0.5f, 0.5f, 0.5f,
-
-                // Left Border Line
-                -0.5f, 0.5f, -0.5f, -0.5f,
-
-                // Right Border Line
-                0.5f, 0.5f, 0.5f, -0.5f,
+                0f, -0.25f, 0f, 0f, 1f,
+                0f, 0.25f, 1f, 0f, 0f
         };
 
         vertexData = ByteBuffer.allocateDirect(
@@ -86,82 +79,72 @@ public class AirHockeyRenderer implements Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-        glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
-        String vertexShaderSource = TextResourceReader.readTextFileFromResource(context, R.raw.simple_vertex_shader);
-        String fragmentShaderSource = TextResourceReader.readTextFileFromResource(context, R.raw.simple_fragment_shader);
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+        String vertexShaderSource = TextResourceReader.readTextFileFromResource(
+                context, R.raw.simple_vertex_shader);
+        String fragmentShaderSource = TextResourceReader.readTextFileFromResource(
+                context, R.raw.simple_fragment_shader);
 
         int vertexShader = ShaderHelper.compileVertexShader(vertexShaderSource);
         int fragmentShader = ShaderHelper.compileFragmentShader(fragmentShaderSource);
 
-        int program = ShaderHelper.linkProgram(vertexShader, fragmentShader);
-
-        if(LoggerConfig.ON){
+        program = ShaderHelper.linkProgram(vertexShader, fragmentShader);
+        if (LoggerConfig.ON) {
             ShaderHelper.validateProgram(program);
         }
         glUseProgram(program);
 
-        uColorLocation = glGetUniformLocation(program, "u_Color");
+        aColorLocation = glGetAttribLocation(program, "a_Color");
         aPositionLocation = glGetAttribLocation(program, "a_Position");
-        uPointSizeLocation = glGetUniformLocation(program, "u_PointSize");
 
         vertexData.position(0);
-        glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT, false, 0, vertexData);
+        glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT,
+                false, STRIDE, vertexData);
 
         glEnableVertexAttribArray(aPositionLocation);
+
+        vertexData.position(POSITION_COMPONENT_COUNT);
+        glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GL_FLOAT,
+                false, STRIDE, vertexData);
+        glEnableVertexAttribArray(aColorLocation);
+
     }
 
+    /**
+     * onSurfaceChanged is called whenever the surface has changed. This is
+     * called at least once when the surface is initialized. Keep in mind that
+     * Android normally restarts an Activity on rotation, and in that case, the
+     * renderer will be destroyed and a new one created.
+     *
+     * @param width  The new width, in pixels.
+     * @param height The new height, in pixels.
+     */
     @Override
-    public void onSurfaceChanged(GL10 glUnused, int width, int height){
+    public void onSurfaceChanged(GL10 glUnused, int width, int height) {
         // Set the OpenGL viewport to fill the entire surface.
         glViewport(0, 0, width, height);
-
     }
 
+    /**
+     * OnDrawFrame is called whenever a new frame needs to be drawn. Normally,
+     * this is done at the refresh rate of the screen.
+     */
     @Override
-    public void onDrawFrame(GL10 glUnused){
+    public void onDrawFrame(GL10 glUnused) {
         // Clear the rendering surface.
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Drawing the triangles.
-        glUniform4f(uColorLocation, 1.0f, 1.0f, 1.0f, 1.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // Triangle fan.
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 6);
 
-        // Drawing the dividing line.
-        glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+        // Dividing line.
         glDrawArrays(GL_LINES, 6, 2);
 
-        // Set the mullets (mallets) size to be twice as big as the puck
-        float mulletsSize = 2.0f * PUCK_SIZE;
-        // Adjust size.
-        glUniform1f(uPointSizeLocation, mulletsSize);
         // Draw the first mallet blue.
-        glUniform4f(uColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
         glDrawArrays(GL_POINTS, 8, 1);
 
         // Draw the second mallet red.
-        glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         glDrawArrays(GL_POINTS, 9, 1);
-
-        // Readjust size.
-        glUniform1f(uPointSizeLocation, PUCK_SIZE);
-        // Draw the puck red.
-        glUniform4f(uColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
-        glDrawArrays(GL_POINTS, 10, 1);
-
-        // Draw the bottom border line.
-        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
-        glDrawArrays(GL_LINES, 11, 2);
-
-        // Draw the top border line.
-        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
-        glDrawArrays(GL_LINES, 13, 2);
-
-        // Draw the left border line.
-        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
-        glDrawArrays(GL_LINES, 15, 2);
-
-        // Draw the right border line.
-        glUniform4f(uColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
-        glDrawArrays(GL_LINES, 17, 2);
     }
 }
