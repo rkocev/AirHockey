@@ -140,8 +140,9 @@ public class AirHockeyRenderer implements Renderer {
 
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float)width/(float)height, 1f, 10f);
         setIdentityM(modelMatrix,0);
-        translateM(modelMatrix,0, 0f, 0f, -3f);
+        translateM(modelMatrix,0, 0f, 0f, -4.5f);
         rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
+        rotateM(modelMatrix, 0, -90f, 0f, 0f, 1f);
 
         multiplyMM(temp,0 ,projectionMatrix, 0, modelMatrix, 0);
         System.arraycopy(temp,0, projectionMatrix,0, temp.length);
