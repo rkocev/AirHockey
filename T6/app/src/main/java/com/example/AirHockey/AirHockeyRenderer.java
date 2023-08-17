@@ -57,7 +57,7 @@ public class AirHockeyRenderer implements Renderer {
     private final float[] projectionMatrix = new float[16];
     private final float[] modelMatrix = new float[16];
     private final float[] temp = new float[16];
-
+    private float angle = 0f;
     public AirHockeyRenderer(Context context) {
         this.context = context;
 
@@ -142,10 +142,8 @@ public class AirHockeyRenderer implements Renderer {
         setIdentityM(modelMatrix,0);
         translateM(modelMatrix,0, 0f, 0f, -4.5f);
         rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
-        rotateM(modelMatrix, 0, -90f, 0f, 0f, 1f);
 
         multiplyMM(temp,0 ,projectionMatrix, 0, modelMatrix, 0);
-        System.arraycopy(temp,0, projectionMatrix,0, temp.length);
 
         glUniformMatrix4fv(uMatrixLocation, 1, false, projectionMatrix, 0);
     }
@@ -170,5 +168,16 @@ public class AirHockeyRenderer implements Renderer {
 
         // Draw the second mallet red.
         glDrawArrays(GL_POINTS, 9, 1);
+
+        // Rotate the model matrix every frame
+        setIdentityM(modelMatrix,0);
+        translateM(modelMatrix,0, 0f, 0f, -4.5f);
+        rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
+        rotateM(modelMatrix, 0, angle, 0f, 0f, 1f);
+        angle += 2f; // This will control the speed of rotation
+
+        // Multiply the projection and model matrices
+        multiplyMM(temp,0 ,projectionMatrix, 0, modelMatrix, 0);
+        glUniformMatrix4fv(uMatrixLocation, 1, false, temp, 0);  // Notice we use temp here!
     }
 }
