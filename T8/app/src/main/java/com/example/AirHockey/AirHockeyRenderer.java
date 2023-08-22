@@ -61,6 +61,7 @@ public class AirHockeyRenderer implements Renderer {
         colorProgram = new ColorShaderProgram(context);
 
         texture[0] = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface);
+        texture[1] = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface2);
 
     }
 
@@ -73,7 +74,7 @@ public class AirHockeyRenderer implements Renderer {
                 / (float) height, 1f, 10f);
 
         setIdentityM(modelMatrix, 0);
-        translateM(modelMatrix, 0, 0f, 0f, -2.5f);
+        translateM(modelMatrix, 0, 0f, 0f, -3.1f);
         rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
 
         final float[] temp = new float[16];
@@ -85,17 +86,24 @@ public class AirHockeyRenderer implements Renderer {
     public void onDrawFrame(GL10 glUnused) {
         // Clear the rendering surface.
         glClear(GL_COLOR_BUFFER_BIT);
-
-        // No culling of back faces
-        glDisable(GL_CULL_FACE);
-        // No depth testing
-        glDisable(GL_DEPTH_TEST);
+        // Disable blending
+        glDisable(GL_BLEND);
 
         // Draw the table.
         textureProgram.useProgram();
         textureProgram.setUniforms(projectionMatrix, texture);
         table.bindData(textureProgram);
         textureProgram.setuTextureUnit(0);
+        table.draw();
+
+        // Enable blending.
+        glEnable(GL_BLEND);
+        //glEnable(GL_FUNC_ADD);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Draw the second table.
+        textureProgram.setuTextureUnit(1);
         table.draw();
 
         // Draw the mallets.
