@@ -33,13 +33,11 @@ public class TextureShaderProgram extends ShaderProgram {
         // Bind the texture to this unit.
         glBindTexture(GL_TEXTURE_2D, textureId[0]);
 
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, textureId[2]);
+        glActiveTexture(GL_TEXTURE1); // Use another texture unit (e.g., GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, textureId[2]); // Bind the leaves mask texture
 
-        // Tell the texture uniform sampler to use this texture in the shader by
-        // telling it to read from texture unit 0.
-        glUniform1i(uTextureUnitLocation, 0);
-
+        // Tell the shader that the mask texture is on texture unit 1
+        glUniform1i(uTextureUnitLocation2, 1);
     }
 
     public void setuTextureUnit(int textureUnitLocation){
