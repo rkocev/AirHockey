@@ -43,6 +43,7 @@ public class AirHockeyRenderer implements Renderer {
     private ColorShaderProgram colorProgram;
 
     private int [] textures=new int[2];
+    private float rotation = 0;
     public AirHockeyRenderer(Context context) {
         this.context = context;
     }
@@ -107,6 +108,8 @@ public class AirHockeyRenderer implements Renderer {
         colorProgram.setUniforms(modelViewProjectionMatrix, 0.8f, 0.8f, 1f);
         puck.bindData(colorProgram);
         puck.draw();
+
+        rotateM(viewMatrix, 0, 1f, 0f, 1f, 0f);
     }
 
     // The mallets and the puck are positioned on the same plane as the table.
