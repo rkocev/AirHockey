@@ -1,5 +1,4 @@
 package com.example.AirHockey;
-
 import static android.opengl.GLES20.*;
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.GL_CULL_FACE;
@@ -15,13 +14,10 @@ import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.rotateM;
 import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.translateM;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
-
 import com.example.AirHockey.objects.Mallet;
 import com.example.AirHockey.objects.Table;
 import com.example.AirHockey.programs.ColorShaderProgram;
@@ -29,39 +25,29 @@ import com.example.AirHockey.programs.TextureShaderProgram;
 import com.example.AirHockey.utils.MatrixHelper;
 import com.example.AirHockey.utils.TextureHelper;
 import com.example.ar_ah.R;
-
-
 public class AirHockeyRenderer implements Renderer {
     private final Context context;
-
     private final float[] projectionMatrix = new float[16];
     private final float[] modelMatrix = new float[16];
-
     private Table table;
     private Mallet mallet;
-
     private TextureShaderProgram textureProgram;
     private ColorShaderProgram colorProgram;
-
-    private int[] texture=new int[2];
-
+    private int[] texture=new int[3];
     public AirHockeyRenderer(Context context) {
         this.context = context;
     }
-
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-
         table = new Table();
         mallet = new Mallet();
-
         textureProgram = new TextureShaderProgram(context);
         colorProgram = new ColorShaderProgram(context);
 
         texture[0] = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface);
         texture[1] = TextureHelper.loadTexture(context, R.drawable.air_hockey_surface2);
+        texture[2] = TextureHelper.loadTexture(context, R.drawable.leaves);
 
     }
 
@@ -69,7 +55,6 @@ public class AirHockeyRenderer implements Renderer {
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
         // Set the OpenGL viewport to fill the entire surface.
         glViewport(0, 0, width, height);
-
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width
                 / (float) height, 1f, 10f);
 
@@ -81,7 +66,6 @@ public class AirHockeyRenderer implements Renderer {
         multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0);
         System.arraycopy(temp, 0, projectionMatrix, 0, temp.length);
     }
-
     @Override
     public void onDrawFrame(GL10 glUnused) {
         // Clear the rendering surface.
@@ -103,7 +87,7 @@ public class AirHockeyRenderer implements Renderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Draw the second table.
-        textureProgram.setuTextureUnit(1);
+        textureProgram.setuTextureUnit(2);
         table.draw();
 
         // Draw the mallets.
@@ -112,5 +96,4 @@ public class AirHockeyRenderer implements Renderer {
         mallet.bindData(colorProgram);
         mallet.draw();
     }
-
 }

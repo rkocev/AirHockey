@@ -1,11 +1,7 @@
 package com.example.AirHockey.programs;
-
 import android.content.Context;
-
 import com.example.ar_ah.R;
-
 import static android.opengl.GLES20.*;
-
 public class TextureShaderProgram extends ShaderProgram {
     // Uniform locations
     private final int uMatrixLocation;
@@ -15,11 +11,9 @@ public class TextureShaderProgram extends ShaderProgram {
     // Attribute locations
     private final int aPositionLocation;
     private final int aTextureCoordinatesLocation;
-
     public TextureShaderProgram(Context context) {
         super(context, R.raw.texture_vertex_shader,
                 R.raw.texture_fragment_shader);
-
         // Retrieve uniform locations for the shader program.
         uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
         uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
@@ -31,7 +25,6 @@ public class TextureShaderProgram extends ShaderProgram {
         aTextureCoordinatesLocation =
                 glGetAttribLocation(program, A_TEXTURE_COORDINATES);
     }
-
     public void setUniforms(float[] matrix, int[] textureId) {
         // Pass the matrix into the shader program.
         glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
@@ -40,8 +33,8 @@ public class TextureShaderProgram extends ShaderProgram {
         // Bind the texture to this unit.
         glBindTexture(GL_TEXTURE_2D, textureId[0]);
 
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, textureId[1]);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textureId[2]);
 
         // Tell the texture uniform sampler to use this texture in the shader by
         // telling it to read from texture unit 0.

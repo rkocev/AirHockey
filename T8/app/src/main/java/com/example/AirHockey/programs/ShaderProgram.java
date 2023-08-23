@@ -1,17 +1,11 @@
 package com.example.AirHockey.programs;
-
 import android.content.Context;
-
 import com.example.AirHockey.utils.ShaderHelper;
 import com.example.AirHockey.utils.TextResourceReader;
-
 import static android.opengl.GLES20.glUseProgram;
-
 /**
  * Created by klen on 19/04/16.
  */
-
-
 abstract class ShaderProgram {
     // Uniform constants
     protected static final String U_MATRIX = "u_Matrix";
@@ -20,7 +14,6 @@ abstract class ShaderProgram {
     protected static final String A_POSITION = "a_Position";
     protected static final String A_COLOR = "a_Color";
     protected static final String A_TEXTURE_COORDINATES = "a_TextureCoordinates";
-
     // Shader program
     protected final int program;
     protected ShaderProgram(Context context, int vertexShaderResourceId,
@@ -32,7 +25,6 @@ abstract class ShaderProgram {
                 TextResourceReader.readTextFileFromResource(
                         context, fragmentShaderResourceId));
     }
-
     public void useProgram() {
         // Set the current OpenGL shader program to this program.
         glUseProgram(program);
