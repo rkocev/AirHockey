@@ -6,15 +6,15 @@ import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import static android.opengl.GLES20.glBindTexture;
 import static android.opengl.GLES20.glDeleteTextures;
 import static android.opengl.GLES20.glGenTextures;
 import static android.opengl.GLES20.*;
 import static android.opengl.GLUtils.texImage2D;
 
+/**
+ * Created by klen on 19/04/16.
+ */
 public class TextureHelper {
     private static final String TAG ="TextureHelper";
 

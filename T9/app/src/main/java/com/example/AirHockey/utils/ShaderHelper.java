@@ -1,60 +1,68 @@
 package com.example.AirHockey.utils;
 
-import static android.opengl.GLES20.*;
-
 import android.util.Log;
+
+import static android.opengl.GLES20.*;
 
 public class ShaderHelper {
     private static final String TAG = "ShaderHelper";
 
-    public static int compileVertexShader(String shaderCode){
+    public static int compileVertexShader(String shaderCode) {
         return compileShader(GL_VERTEX_SHADER, shaderCode);
     }
 
-    public static int compileFragmentShader(String shaderCode){
+    public static int compileFragmentShader(String shaderCode) {
         return compileShader(GL_FRAGMENT_SHADER, shaderCode);
     }
 
-    private static int compileShader(int type, String shaderCode){
-        final int shaderObjectID = glCreateShader(type);
-        if(shaderObjectID == 0){
-            if(LoggerConfig.ON){
+    private static int compileShader(int type, String shaderCode) {
+        final int shaderObjectId = glCreateShader(type);
+        if (shaderObjectId == 0) {
+            if (LoggerConfig.ON) {
                 Log.w(TAG, "Could not create new shader.");
             }
             return 0;
         }
 
         // Pass in the shader source.
-        glShaderSource(shaderObjectID, shaderCode);
+        glShaderSource(shaderObjectId, shaderCode);
 
         // Compile the shader.
-        glCompileShader(shaderObjectID);
+        glCompileShader(shaderObjectId);
 
         final int[] compileStatus = new int[1];
-        glGetShaderiv(shaderObjectID, GL_COMPILE_STATUS, compileStatus, 0);
+        glGetShaderiv(shaderObjectId, GL_COMPILE_STATUS, compileStatus, 0);
 
-        if(compileStatus[0] == 0){
+        if (compileStatus[0] == 0) {
             // If it failed, delete the shader object.
-            glDeleteShader(shaderObjectID);
-            if(LoggerConfig.ON){
+            glDeleteShader(shaderObjectId);
+            if (LoggerConfig.ON) {
                 Log.w(TAG, "Compilation of shader failed.");
             }
             return 0;
         }
-        return shaderObjectID;
+        return shaderObjectId;
     }
 
-    public static int linkProgram(int vertexShader, int fragmentShader){
-        int programObjectId = glCreateProgram();
-        if(programObjectId == 0){
-            if(LoggerConfig.ON){
-                Log.e(TAG, "Could not creat new program.");
+    public static int linkProgram(int vertexShaderId, int fragmentShaderId) {
+
+        // Create a new program object.
+        final int programObjectId = glCreateProgram();
+
+        if (programObjectId == 0) {
+            if (LoggerConfig.ON) {
+                Log.w(TAG, "Could not create new program");
             }
+
             return 0;
         }
 
-        glAttachShader(programObjectId, vertexShader);
-        glAttachShader(programObjectId, fragmentShader);
+        // Attach the vertex shader to the program.
+        glAttachShader(programObjectId, vertexShaderId);
+        // Attach the fragment shader to the program.
+        glAttachShader(programObjectId, fragmentShaderId);
+
+        // Link the two shaders together into a program.
         glLinkProgram(programObjectId);
 
         // Get the link status.
@@ -77,15 +85,16 @@ public class ShaderHelper {
             return 0;
         }
 
+        // Return the program object ID.
         return programObjectId;
     }
 
-    public static boolean validateProgram(int programObjectId){
+    public static boolean validateProgram(int programObjectId) {
         glValidateProgram(programObjectId);
         final int[] validateStatus = new int[1];
         glGetProgramiv(programObjectId, GL_VALIDATE_STATUS, validateStatus, 0);
         Log.v(TAG, "Results of validating program: " + validateStatus[0] +
-                "\nLog: " + glGetProgramInfoLog(programObjectId));
+                "\nLog:" + glGetProgramInfoLog(programObjectId));
 
         return validateStatus[0] != 0;
     }
@@ -111,4 +120,5 @@ public class ShaderHelper {
 
         return program;
     }
+
 }
